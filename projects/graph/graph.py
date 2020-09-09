@@ -67,7 +67,31 @@ class Graph:
         Print each vertex in depth-first order
         beginning from starting_vertex.
         """
-        pass  # TODO
+        # pass  # TODO
+
+        search_tracker = {}
+        parent_tracker = {}
+
+        def DFS_visit(vert):
+            search_tracker[vert] = 1
+            print(vert)
+
+            for n in self.get_neighbors(vert):
+                if search_tracker[n] == 0:
+                    parent_tracker[n] = vert
+                    DFS_visit(n)
+
+            search_tracker[vert] = 2
+
+        for v in self.vertices:
+            search_tracker[v] = 0
+            parent_tracker[v] = None
+
+        for v in self.vertices:
+            if search_tracker[v] == 0:
+                DFS_visit(v)
+
+
 
     def dft_recursive(self, starting_vertex):
         """
@@ -148,14 +172,14 @@ if __name__ == '__main__':
     '''
     graph.bft(1)
 
-    # '''
-    # Valid DFT paths:
-    #     1, 2, 3, 5, 4, 6, 7
-    #     1, 2, 3, 5, 4, 7, 6
-    #     1, 2, 4, 7, 6, 3, 5
-    #     1, 2, 4, 6, 3, 5, 7
-    # '''
-    # graph.dft(1)
+    '''
+    Valid DFT paths:
+        1, 2, 3, 5, 4, 6, 7
+        1, 2, 3, 5, 4, 7, 6
+        1, 2, 4, 7, 6, 3, 5
+        1, 2, 4, 6, 3, 5, 7
+    '''
+    graph.dft(1)
     # graph.dft_recursive(1)
 
     # '''
