@@ -12,6 +12,14 @@ class Queue():
             return None
     def size(self):
         return len(self.queue)
+    def isEmpty(self):
+        if len(self.queue) > 0:
+            return False
+        else:
+            return True
+    def getOne(self, index):
+        if self.isEmpty() is False:
+            return self.queue[index]
 
 class Stack():
     def __init__(self):
