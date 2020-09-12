@@ -118,20 +118,43 @@ player = Player(world.starting_room)
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
 traversal_path = []
-traversal_path_new = []
+backtrack = {}
 
 graph = Graph()
 
 current_room = player.current_room.id
 starting_room = player.current_room.id
 
+counterrr = 0
+
 def travel_function(current_room, direction = None, old_room = None):
     current_exits = player.current_room.get_exits()
     checker = graph.vertices.get(current_room)
+    print('check', checker)
+    print(current_room)
+    if current_room == 0 and direction is not None:
+        chek = 0
+        for d in graph.vertices[current_room]:
+            print(graph.vertices[current_room][d])
+            if type(graph.vertices[current_room][d]) == str:
+                chek = 1
+        if chek == 0:
+            return
     if checker is None:
         graph.add_vertex(current_room)
+        if direction == 'n':
+            backtrack[current_room] = 's'
+        if direction == 's':
+            backtrack[current_room] = 'n'
+        if direction == 'e':
+            backtrack[current_room] = 'w'
+        if direction == 'w':
+            backtrack[current_room] = 'e'
         for i in current_exits:
             graph.vertices[current_room][i] = '?'
+    for d in graph.vertices[current_room]:
+            print(d, graph.vertices[current_room][d])
+    print(type(old_room))
     if old_room != None:
         if direction == 'n':
             graph.vertices[old_room]['n'] = player.current_room.id
@@ -146,48 +169,29 @@ def travel_function(current_room, direction = None, old_room = None):
             graph.vertices[old_room]['w'] = player.current_room.id
             graph.vertices[player.current_room.id]['e'] = old_room
     counter = 0
+    for d in graph.vertices[current_room]:
+            print(d, graph.vertices[current_room][d])
+    found = 0
     for i in graph.vertices[current_room]:
         length = len(graph.vertices[current_room])
+        print('here', length)
         counter = counter + 1
-        if type(graph.vertices[current_room][i]) == str:
+        print(counter)
+        print(type(graph.vertices[current_room][i]))
+        print(graph.vertices[current_room][i])
+        if type(graph.vertices[current_room][i]) == str and found == 0:
+            counter = 0
+            found = 1
             player.travel(i)
+            print(player.current_room.id)
             traversal_path.append(i)
             travel_function(player.current_room.id, i, current_room)
-            break
-        elif counter == length:
-            reversed_traversal_path = reversed(traversal_path)
-            foundd = 0
-            for a in reversed_traversal_path:
-                founddd = 0
-                if a == 'n':
-                    a = 's'
-                    player.travel(a)
-                    founddd = 1
-                if a == 's' and founddd == 0:
-                    a = 'n'
-                    player.travel(a)
-                    founddd = 1
-                if a == 'e' and founddd == 0:
-                    a = 'w'
-                    player.travel(a)
-                    founddd = 1
-                if a == 'w' and founddd == 0:
-                    a = 'e'
-                    player.travel(a)
-                traversal_path_new.append(a)
-                for b in graph.vertices[player.current_room.id]:
-                    if type(graph.vertices[player.current_room.id][b]) == str:
-                        player.travel(b)
-                        foundd = 1
-                        for c in traversal_path_new:
-                            traversal_path.append(c)
-                        traversal_path.append(b)
-                        travel_function(player.current_room.id, b)
-                        break
-                    if foundd == 1:
-                        break
-                if foundd == 1:
-                    break
+        elif counter == length and found == 0:
+            counter = 0
+            found = 1
+            player.travel(backtrack[current_room])
+            traversal_path.append(backtrack[current_room])
+            travel_function(current_room = player.current_room.id, direction = backtrack[current_room])
 
 travel_function(current_room)
 
