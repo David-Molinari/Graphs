@@ -117,19 +117,20 @@ player = Player(world.starting_room)
 
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
+
+# Below are initial things needed before entering the travel_function
 traversal_path = []
 backtrack = {}
-
 graph = Graph()
-
 current_room = player.current_room.id
-starting_room = player.current_room.id
 
 def travel_function(current_room, direction = None, old_room = None):
     current_exits = player.current_room.get_exits()
     checker = graph.vertices.get(current_room)
     print('check', checker)
     print(current_room)
+    # Below is checking if the player has arrived back to room 0, with all directions traveled. 
+    # If all directions from room 0 have been traveled, it returns; else, it continues in the funtion.
     if current_room == 0 and direction is not None:
         chek = 0
         for d in graph.vertices[current_room]:
@@ -138,6 +139,9 @@ def travel_function(current_room, direction = None, old_room = None):
                 chek = 1
         if chek == 0:
             return
+    # Below is checking if the current room has been visited.
+    # If not, it logs which direction to backtrack if the room is backtracked through, and
+    # the current room's exits are set to '?' (initial values for the room)
     if checker is None:
         graph.add_vertex(current_room)
         if direction == 'n':
@@ -153,7 +157,10 @@ def travel_function(current_room, direction = None, old_room = None):
     for d in graph.vertices[current_room]:
             print(d, graph.vertices[current_room][d])
     print(type(old_room))
-    #Seems the problem is below
+    # Seems the problem is below
+    # Below, if the old_room is not None (meaning we are not backtracking):
+    # this sets the previous room's value for the direction traveled to the current room 
+    # and the current room's opposite direction to the direction traveled to the old room
     if old_room is not None:
         if direction == 'n':
             graph.vertices[old_room]['n'] = player.current_room.id
@@ -170,6 +177,10 @@ def travel_function(current_room, direction = None, old_room = None):
     counter = 0
     for d in graph.vertices[current_room]:
             print(d, graph.vertices[current_room][d])
+    # Below, loops through the current room's exit values.
+    # If there is a '?', the player travels that direction.
+    # If not, the player begins to backtrack.
+    # Below also includes the necessary travel_path recording.
     found = 0
     for i in graph.vertices[current_room]:
         length = len(graph.vertices[current_room])
