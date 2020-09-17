@@ -190,7 +190,7 @@ def travel_function(current_room, direction = None, old_room = None):
             found = 1
             player.travel(backtrack[current_room])
             traversal_path.append(backtrack[current_room])
-            travel_function(current_room = player.current_room.id, direction = backtrack[current_room])
+            travel_function(current_room = player.current_room.id, direction = backtrack[current_room], old_room = None)
 
 travel_function(current_room)
 
