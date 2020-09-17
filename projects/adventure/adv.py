@@ -125,8 +125,6 @@ graph = Graph()
 current_room = player.current_room.id
 starting_room = player.current_room.id
 
-counterrr = 0
-
 def travel_function(current_room, direction = None, old_room = None):
     current_exits = player.current_room.get_exits()
     checker = graph.vertices.get(current_room)
@@ -155,7 +153,8 @@ def travel_function(current_room, direction = None, old_room = None):
     for d in graph.vertices[current_room]:
             print(d, graph.vertices[current_room][d])
     print(type(old_room))
-    if old_room != None:
+    #Seems the problem is below
+    if old_room is not None:
         if direction == 'n':
             graph.vertices[old_room]['n'] = player.current_room.id
             graph.vertices[player.current_room.id]['s'] = old_room
