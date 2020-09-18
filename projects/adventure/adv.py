@@ -1,3 +1,10 @@
+"""
+Until the Friday of the resubmit, I did not realize that the character to could
+reenter a room without backtracking to it. This changes how I need to solve
+the problem, but at this point I do not have time. Hopefully more time can
+be given, and if needed, someone can meet with me in Support Hours.
+"""
+
 from room import Room
 from player import Player
 from world import World
