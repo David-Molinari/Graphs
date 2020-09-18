@@ -123,18 +123,23 @@ traversal_path = []
 backtrack = {}
 graph = Graph()
 current_room = player.current_room.id
+starting_room = player.current_room.id
+countercounter = 0
+started = 0
+
+print('current room | direction traveled last | old room (if not backtracking)')
 
 def travel_function(current_room, direction = None, old_room = None):
+    print(current_room, direction, old_room)
+    global started
+    started = 1
     current_exits = player.current_room.get_exits()
     checker = graph.vertices.get(current_room)
-    print('check', checker)
-    print(current_room)
     # Below is checking if the player has arrived back to room 0, with all directions traveled. 
     # If all directions from room 0 have been traveled, it returns; else, it continues in the funtion.
-    if current_room == 0 and direction is not None:
+    if current_room == starting_room and started is not 1:
         chek = 0
         for d in graph.vertices[current_room]:
-            print(graph.vertices[current_room][d])
             if type(graph.vertices[current_room][d]) == str:
                 chek = 1
         if chek == 0:
@@ -154,9 +159,6 @@ def travel_function(current_room, direction = None, old_room = None):
             backtrack[current_room] = 'e'
         for i in current_exits:
             graph.vertices[current_room][i] = '?'
-    for d in graph.vertices[current_room]:
-            print(d, graph.vertices[current_room][d])
-    print(type(old_room))
     # Seems the problem is below
     # Below, if the old_room is not None (meaning we are not backtracking):
     # this sets the previous room's value for the direction traveled to the current room 
@@ -174,34 +176,34 @@ def travel_function(current_room, direction = None, old_room = None):
         if direction == 'w':
             graph.vertices[old_room]['w'] = player.current_room.id
             graph.vertices[player.current_room.id]['e'] = old_room
-    counter = 0
-    for d in graph.vertices[current_room]:
-            print(d, graph.vertices[current_room][d])
     # Below, loops through the current room's exit values.
     # If there is a '?', the player travels that direction.
     # If not, the player begins to backtrack.
     # Below also includes the necessary travel_path recording.
+    counter = 0
     found = 0
+    length = len(graph.vertices[current_room])
     for i in graph.vertices[current_room]:
-        length = len(graph.vertices[current_room])
-        print('here', length)
         counter = counter + 1
-        print(counter)
-        print(type(graph.vertices[current_room][i]))
-        print(graph.vertices[current_room][i])
         if type(graph.vertices[current_room][i]) == str and found == 0:
             counter = 0
             found = 1
             player.travel(i)
-            print(player.current_room.id)
             traversal_path.append(i)
             travel_function(player.current_room.id, i, current_room)
         elif counter == length and found == 0:
+            counterthis = 0
+            for k in graph.vertices[current_room]:
+                if type(graph.vertices[current_room][k]) == int and current_room == starting_room:
+                    counterthis += 1
+                if counterthis == 4:
+                    return
             counter = 0
             found = 1
             player.travel(backtrack[current_room])
             traversal_path.append(backtrack[current_room])
             travel_function(current_room = player.current_room.id, direction = backtrack[current_room], old_room = None)
+    found = 0
 
 travel_function(current_room)
 
@@ -219,6 +221,15 @@ if len(visited_rooms) == len(room_graph):
 else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
+    print(len(traversal_path))
+    tracker = {}
+    for i in range(0, 500):
+        tracker[i] = i
+    for i in visited_rooms:
+        del tracker[i.id]
+    print('Unvisited rooms below:')
+    for i in tracker:
+        print(i)
 
 
 
