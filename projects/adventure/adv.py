@@ -1,9 +1,9 @@
-"""
+'''
 Until the Friday of the resubmit, I did not realize that the character to could
 reenter a room without backtracking to it. This changes how I need to solve
 the problem, but at this point I do not have time. Hopefully more time can
 be given, and if needed, someone can meet with me in Support Hours.
-"""
+'''
 
 from room import Room
 from player import Player
@@ -16,22 +16,23 @@ from ast import literal_eval
 
 class Graph:
 
-    """Represent a graph as a dictionary of vertices mapping labels to edges."""
+    '''Represent a graph as a dictionary of vertices mapping labels to edges.'''
     def __init__(self):
         self.vertices = {}
+        self.travel_tracker = {}
 
     def add_vertex(self, vertex_id):
-        """
+        '''
         Add a vertex to the graph.
-        """
+        '''
         # pass  # TODO
         self.vertices[vertex_id] = {}
         
 
     def add_edge(self, v1, v2):
-        """
+        '''
         Add a directed edge to the graph.
-        """
+        '''
         # pass  # TODO
         if v1 in self.vertices and v2 in self.vertices:
             self.vertices[v1].add(v2)
@@ -39,17 +40,17 @@ class Graph:
             raise IndexError("That vertex does not exist!")
 
     def get_neighbors(self, vertex_id):
-        """
+        '''
         Get all neighbors (edges) of a vertex.
-        """
+        '''
         # pass  # TODO
         return self.vertices[vertex_id]
 
     def bft(self, starting_vertex):
-        """
+        '''
         Print each vertex in breadth-first order
         beginning from starting_vertex.
-        """
+        '''
         # pass  # TODO
         search_tracker = {}
 
@@ -74,10 +75,10 @@ class Graph:
             search_tracker[u] = 2
 
     def dft(self, starting_vertex):
-        """
+        '''
         Print each vertex in depth-first order
         beginning from starting_vertex.
-        """
+        '''
         # pass  # TODO
 
         search_tracker = {}
@@ -102,6 +103,21 @@ class Graph:
             if search_tracker[v] == 0:
                 DFS_visit(v)
 
+
+'''
+I can let you know one high level way to approach this sprint is to do DFS - 
+essentially moving to rooms while you can, 
+and keeping track of where you went, and then once you hit a dead end, 
+you backtrack until you hit a room with an unexplored room neighbor. 
+You keep going while your visited is less than the # of rooms you need to explore.
+'''
+
+'''
+Initiate a graph accompanied by a traversal function.
+Do a dfs, keeping track of where I went.
+
+'''
+
 # Load world
 world = World()
 
@@ -124,95 +140,52 @@ player = Player(world.starting_room)
 
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
-
-# Below are initial things needed before entering the travel_function
-traversal_path = []
-backtrack = {}
 graph = Graph()
-current_room = player.current_room.id
-starting_room = player.current_room.id
-countercounter = 0
-started = 0
+traversal_path = []
+visited_rooms = {}
+bt_stack = []
 
-print('current room | direction traveled last | old room (if not backtracking)')
+def traversal_function(current_room = player.current_room):
+    global visited_rooms
+    if len(visited_rooms) == 500:
+        return
+    if len(visited_rooms) > 0:
+        if visited_rooms.get(current_room.id) == None:
+            visited_rooms[current_room.id] = 1
+    if graph.vertices.get(current_room.id) == None:
+        current_exits = player.current_room.get_exits()
+        for e in current_exits:
+            if graph.vertices.get(current_room.id):
+                graph.vertices[current_room.id] = {**graph.vertices[current_room.id], e: '?'}
+            else:
+                graph.vertices[current_room.id] = {e: '?'}
+        player.travel(current_exits[0])
+        graph.vertices[current_room.id][current_exits[0]] = player.current_room.id
+        traversal_path.append(current_exits[0])
+        bt_stack.insert(0, current_room.id)
+        traversal_function(player.current_room)
+    else:
+        counter = 0
+        for e in graph.vertices[current_room.id]:
+            counter += 1
+            if graph.vertices[current_room.id][e] == '?':
+                player.travel(e)
+                graph.vertices[current_room.id][e] = player.current_room.id
+                traversal_path.append(e)
+                bt_stack.insert(0, current_room.id)
+                traversal_function(player.current_room)
+                break
+            elif len(graph.vertices[current_room.id]) == counter:
+                for a in graph.vertices[current_room.id]:
+                    if graph.vertices[current_room.id][a] == bt_stack[0]:
+                        del bt_stack[0]
+                        player.travel(a)
+                        traversal_path.append(a)
+                        traversal_function(player.current_room)
+                        break
 
-def travel_function(current_room, direction = None, old_room = None):
-    print(current_room, direction, old_room)
-    global started
-    started = 1
-    current_exits = player.current_room.get_exits()
-    checker = graph.vertices.get(current_room)
-    # Below is checking if the player has arrived back to room 0, with all directions traveled. 
-    # If all directions from room 0 have been traveled, it returns; else, it continues in the funtion.
-    if current_room == starting_room and started is not 1:
-        chek = 0
-        for d in graph.vertices[current_room]:
-            if type(graph.vertices[current_room][d]) == str:
-                chek = 1
-        if chek == 0:
-            return
-    # Below is checking if the current room has been visited.
-    # If not, it logs which direction to backtrack if the room is backtracked through, and
-    # the current room's exits are set to '?' (initial values for the room)
-    if checker is None:
-        graph.add_vertex(current_room)
-        if direction == 'n':
-            backtrack[current_room] = 's'
-        if direction == 's':
-            backtrack[current_room] = 'n'
-        if direction == 'e':
-            backtrack[current_room] = 'w'
-        if direction == 'w':
-            backtrack[current_room] = 'e'
-        for i in current_exits:
-            graph.vertices[current_room][i] = '?'
-    # Seems the problem is below
-    # Below, if the old_room is not None (meaning we are not backtracking):
-    # this sets the previous room's value for the direction traveled to the current room 
-    # and the current room's opposite direction to the direction traveled to the old room
-    if old_room is not None:
-        if direction == 'n':
-            graph.vertices[old_room]['n'] = player.current_room.id
-            graph.vertices[player.current_room.id]['s'] = old_room
-        if direction == 's':
-            graph.vertices[old_room]['s'] = player.current_room.id
-            graph.vertices[player.current_room.id]['n'] = old_room
-        if direction == 'e':
-            graph.vertices[old_room]['e'] = player.current_room.id
-            graph.vertices[player.current_room.id]['w'] = old_room
-        if direction == 'w':
-            graph.vertices[old_room]['w'] = player.current_room.id
-            graph.vertices[player.current_room.id]['e'] = old_room
-    # Below, loops through the current room's exit values.
-    # If there is a '?', the player travels that direction.
-    # If not, the player begins to backtrack.
-    # Below also includes the necessary travel_path recording.
-    counter = 0
-    found = 0
-    length = len(graph.vertices[current_room])
-    for i in graph.vertices[current_room]:
-        counter = counter + 1
-        if type(graph.vertices[current_room][i]) == str and found == 0:
-            counter = 0
-            found = 1
-            player.travel(i)
-            traversal_path.append(i)
-            travel_function(player.current_room.id, i, current_room)
-        elif counter == length and found == 0:
-            counterthis = 0
-            for k in graph.vertices[current_room]:
-                if type(graph.vertices[current_room][k]) == int and current_room == starting_room:
-                    counterthis += 1
-                if counterthis == 4:
-                    return
-            counter = 0
-            found = 1
-            player.travel(backtrack[current_room])
-            traversal_path.append(backtrack[current_room])
-            travel_function(current_room = player.current_room.id, direction = backtrack[current_room], old_room = None)
-    found = 0
 
-travel_function(current_room)
+traversal_function()
 
 # TRAVERSAL TEST
 visited_rooms = set()

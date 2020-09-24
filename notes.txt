@@ -1,0 +1,47 @@
+In dft, before hitting end, need to put every room entered on LIFO stack.
+At dead end, move to room at top of LIFO stack (remove room from stack), 
+and bfs for unsearched direction.
+If unsearched direction, dft in that direction.
+If no unsearched direction, see line 2.
+
+Where should LIFO stack be kept?
+Keep global.
+
+Where should traversal path be kept?
+Keep global.
+
+Rooms are logged in self.vertices of graph with exits marked with 
+either '?' or the room in the direction.
+
+
+* The function *
+
+The function receives the player's current room.
+
+check if the visted number of rooms is equal to the # of rooms to explore
+
+if so, break from function
+
+if not,
+
+check if the current room is logged in the graph.verticies:
+
+if not, 
+in graph.verticies at the current number, for each exit add a '?' (in a dictionary)
+travel in a direction.
+log that direction's learnings in graph.verticies
+log the direction traveled in the traversal path
+push the previous room onto the front of the stack
+rerun this function
+
+if so, 
+loop through graph.verticies at the current number for an exit with a '?'.
+if so, 
+see line 28-32.
+if not, 
+check which of the current exits values matches the number on the top of the stack.
+pop it off the stack and travel in the direction.
+log the direction traveled in the traversal path.
+rerun this function
+
+issue is, when I travel forward, I do not log the learnings for the current room.
